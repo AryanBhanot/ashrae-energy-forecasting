@@ -1,0 +1,8 @@
+# Internship Progress Timeline
+
+| Date | Work completed |
+| --- | --- |
+| 18 August | Received the ASHRAE energy-consumption forecasting task and reviewed the dataset and requirements. |
+| 19–20 August | Completed Step 1: filtered to electricity-meter data, checked data completeness and zero readings, and selected Building 105 because it has a complete year of non-zero hourly readings. |
+| 21 August | Completed Step 2: explored Building 105's electricity use through time-series, hourly, weekday/weekend, distribution, and autocorrelation plots. Identified clear daily and weekly usage patterns and investigated unusually high readings. |
+| 22 August | Completed Step 3: merged Building 105 with Site 1 weather data, handled missing weather observations, and assessed the relationship between air temperature and electricity consumption. |
