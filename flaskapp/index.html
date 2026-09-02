@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Building 105 - Electricity Prediction</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 60px auto; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input { width: 100%; padding: 6px; box-sizing: border-box; }
+    button { margin-top: 20px; padding: 10px 20px; }
+    .result { margin-top: 24px; padding: 14px; background: #eef7ee; border-radius: 6px; }
+    .error { margin-top: 24px; padding: 14px; background: #fdecea; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h2>Building 105 - Electricity Consumption Predictor</h2>
+
+  <form method="POST" action="/predict">
+    <label for="hour">Hour of day (0-23)</label>
+    <input type="number" step="1" min="0" max="23" name="hour" id="hour" required>
+
+    <label for="dow">Day of week (0=Mon ... 6=Sun)</label>
+    <input type="number" step="1" min="0" max="6" name="dow" id="dow" required>
+
+    <label for="month">Month (1-12)</label>
+    <input type="number" step="1" min="1" max="12" name="month" id="month" required>
+
+    <label for="lag_24h">Reading 24h ago (kWh)</label>
+    <input type="number" step="any" name="lag_24h" id="lag_24h" required>
+
+    <label for="lag_168h">Reading 168h ago / same hour last week (kWh)</label>
+    <input type="number" step="any" name="lag_168h" id="lag_168h" required>
+
+    <button type="submit">Predict</button>
+  </form>
+
+  {% if prediction is not none %}
+    <div class="result">Predicted meter reading: <strong>{{ prediction }} kWh</strong></div>
+  {% endif %}
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+</body>
+</html>
