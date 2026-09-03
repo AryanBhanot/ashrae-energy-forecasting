@@ -5,7 +5,7 @@ import pandas as pd
 app = Flask(__name__)
 
 # Loaded once at startup, not on every request
-model = joblib.load("../models/model.pkl")
+model = joblib.load("./models/model.pkl")
 
 FEATURES = ["hour", "dow", "month", "lag_24h", "lag_168h"]
 
