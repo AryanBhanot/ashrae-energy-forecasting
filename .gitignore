@@ -38,6 +38,7 @@ venv.bak/
 
 # Large dataset files (keep smaller sample/processed data)
 data/train.csv
+data/test.csv
 
 # VS Code workspace state (keep launch.json)
 .vscode/*
