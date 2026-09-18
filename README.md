@@ -10,12 +10,13 @@ ashrae-energy-forecasting/
 │   ├── building_105_meter0.csv           # Prepared meter-0 readings for Building 105
 │   ├── building_metadata(in).csv         # Metadata for ASHRAE buildings
 │   └── weather_train.csv                 # Hourly site weather observations
-├── flaskapp/                             # Web application service
-│   ├── static/                           # Static assets
-│   │   └── site.css                      # Styling for templates
-│   ├── templates/                        # Jinja2 HTML templates
-│   │   └── hello_there.html              # Dynamic greeting template
-│   └── app.py                            # Flask server entry point
+├── apps/                                 # User interfaces and web services
+│   └── flask/                            # Flask web service
+│       ├── static/                       # Static assets
+│       │   └── site.css                  # Styling for templates
+│       ├── templates/                    # Jinja2 HTML templates
+│       │   └── hello_there.html          # Dynamic greeting template
+│       └── app.py                        # Flask server entry point
 ├── models/                               # Serialized machine learning models
 │   └── building_1074_six_months_model.pkl# Trained XGBoost pipeline
 ├── notebooks/                            # Jupyter notebooks for analysis and ML
@@ -62,7 +63,7 @@ jupyter lab
 To run the Flask application locally:
 
 ```bash
-flask --app flaskapp/app run
+flask --app apps/flask/app run
 ```
 
 Or open the project in VS Code and press `F5` to start using the pre-configured debugger in `.vscode/launch.json`.

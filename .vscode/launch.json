@@ -6,7 +6,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "flaskapp.app",
+                "FLASK_APP": "apps.flask.app",
                 "FLASK_DEBUG": "1"
             },
             "args": [
