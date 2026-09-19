@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} apps.flask.app:app"]
+CMD ["sh", "-c", "streamlit run apps/streamlit/app.py --server.port=${PORT:-8080} --server.address=0.0.0.0"]
