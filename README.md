@@ -7,7 +7,7 @@ This project forecasts hourly building electricity consumption using ASHRAE mete
 ```text
 ashrae-energy-forecasting/
 ├── data/                                 # Datasets and metadata
-│   ├── building_105_meter0.csv           # Prepared meter-0 readings for Building 105
+│   ├── building/                         # Extracted building meter datasets (e.g., 105, 1074)
 │   ├── building_metadata(in).csv         # Metadata for ASHRAE buildings
 │   └── weather_train.csv                 # Hourly site weather observations
 ├── apps/                                 # User interfaces and web services
