@@ -1,167 +1,117 @@
-# ASHRAE Energy Forecasting
+# ⚡ ASHRAE Energy Forecasting
 
-This repository provides an end-to-end machine learning pipeline to forecast hourly building electricity consumption using the ASHRAE - Great Energy Predictor III dataset. It includes data extraction tools, exploratory time-series analysis, feature engineering (lags, weather integration, calendar features), gradient-boosted tree modeling (XGBoost), and deployment-ready web applications (Streamlit dashboard and Flask service) packaged for Docker and GCP Cloud Run.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit%20Cloud-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://ashrae-energy-forecasting.streamlit.app/)
+
+An end-to-end machine learning and operational analytics pipeline to forecast hourly commercial building electricity consumption. Built on the **ASHRAE – Great Energy Predictor III** dataset, this repository covers data extraction, time-series feature engineering, gradient-boosted tree modeling (XGBoost), and an interactive Streamlit dashboard containerized for Docker.
+
+🌐 **Live Application**: [https://ashrae-energy-forecasting.streamlit.app/](https://ashrae-energy-forecasting.streamlit.app/)
 
 ---
 
-## Repository Structure
+## 📌 Project Overview
+
+Electricity consumption in commercial buildings is driven by business operating hours, HVAC schedules, and weekly occupancy cycles. Accurately forecasting this demand helps facility managers plan peak-load mitigation, optimize heating and cooling schedules, and reduce utility demand charges.
+
+This project implements an end-to-end time-series forecasting pipeline using real-world smart meter data from the **ASHRAE – Great Energy Predictor III** benchmark dataset:
+
+- **The Facility**: Focuses on **Building 1074**, an **89,858 sq ft commercial office space** screened for complete, uninterrupted hourly electricity observations.
+- **Feature Engineering**: Models diurnal and weekly operational patterns using calendar features (`hour`, `day of week`, `month`) and multi-scale autoregressive lag features (`24-hour lag` for prior-day load, `168-hour lag` for same-day prior-week load) without forward lookahead bias.
+- **Predictive Modeling**: An **XGBoost** regression model trained strictly on historical data from the first six months (January 1 – June 30, 2016), evaluating out-of-sample forward consumption across **August 2016** (744 hours).
+- **Interactive Monitoring**: A companion Streamlit dashboard (hosted live on Streamlit Cloud) providing visual inspection of hourly forecasts, daily error diagnostics, weekly peak demand, and diurnal weekday vs. weekend load envelopes.
+
+---
+
+## 🗂️ Repository Structure
 
 ```text
 ashrae-energy-forecasting/
-├── apps/                                 # Web applications and service entry points
-│   ├── flask/                            # Flask web service
-│   │   ├── static/                       # Static CSS assets
-│   │   │   └── site.css
-│   │   ├── templates/                    # Jinja2 HTML templates
-│   │   │   └── hello_there.html
-│   │   └── app.py                        # Flask server entry point
-│   └── streamlit/                        # Interactive Streamlit dashboard
-│       └── app.py                        # Streamlit application entry point
-├── data/                                 # Datasets and metadata
-│   ├── building/                         # Standardized building meter datasets
-│   │   ├── 105/                          # Building 105 meter data (building_105.csv, meter_0.csv)
-│   │   └── 1074/                         # Building 1074 meter data (building_1074.csv)
-│   ├── building_metadata(in).csv         # Metadata for ASHRAE buildings (site, primary use, square feet, etc.)
-│   ├── weather_train.csv                 # Hourly site weather observations (air temperature, dew point, etc.)
+├── apps/
+│   ├── streamlit/app.py                  # Streamlit forecasting dashboard
+│   └── flask/app.py                      # Flask service prototype
+├── data/
+│   ├── building/1074/building_1074.csv   # Building 1074 hourly data (309 KB)
+│   ├── building_metadata(in).csv         # Building metadata (sq ft, site ID, primary use)
+│   ├── weather_train.csv                 # Hourly site weather observations
 │   └── train.csv                         # Raw ASHRAE training observations (optional / local)
-├── models/                               # Serialized machine learning models
-│   └── building_1074_six_months_model.pkl# Trained XGBoost model artifact for Building 1074
-├── notebooks/                            # Jupyter notebooks for data extraction, analysis, and ML
-│   ├── building_selection_tool.ipynb     # Interactive tool to filter and identify reliable candidate buildings
-│   ├── building_data_extraction.ipynb    # Utility to filter train.csv and export standardized building meter slices
-│   ├── task1.ipynb                       # Full pipeline for Building 105: EDA, lag features, XGBoost & baseline
-│   └── six_months.ipynb                  # 6-month forecasting analysis and modeling for Building 1074
-├── reports/                              # Project reports and documentation deliverables
-│   ├── Task1_Writeup.pdf                 # Comprehensive technical writeup and methodology report
-│   └── internship_progress_timeline.md   # Chronological log of project milestones and tasks completed
-├── .dockerignore                         # Docker build exclusion rules
-├── .gitignore                            # Git ignore rules for repository hygiene
-├── Dockerfile                            # Production container configuration (GCP Cloud Run ready)
-├── requirements.txt                      # Project Python dependencies
-└── README.md                             # Project overview and documentation
+├── models/
+│   └── building_1074_six_months_model.pkl# Trained XGBoost model for Building 1074
+├── notebooks/
+│   ├── building_selection_tool.ipynb     # Screening candidate buildings for data completeness
+│   ├── building_data_extraction.ipynb    # Slicing individual buildings from train.csv
+│   ├── task1.ipynb                       # Building 105 EDA, lag features, and baseline comparison
+│   └── six_months.ipynb                  # Building 1074 6-month training & August forecast analysis
+├── reports/
+│   ├── Task1_Writeup.pdf                 # Technical writeup and error analysis report
+│   └── internship_progress_timeline.md   # Chronological log of project milestones
+├── Dockerfile                            # Production container spec (Cloud Run ready)
+├── .dockerignore                         # Optimized exclusion rules for slim container builds
+├── requirements.txt                      # Project dependencies
+└── README.md
 ```
 
 ---
 
-## Methodology & Pipeline Overview
+## ⚡ Clone & Setup
 
-1. **Candidate Building Selection (`building_selection_tool.ipynb`)**
-   - Filters buildings by meter type (e.g., electricity / meter 0) and evaluates data completeness, missing timestamps, and continuous zero-reading streaks.
-   - Highlights reliable target buildings such as Building 105 (full year of non-zero observations) and Building 1074.
-
-2. **Data Extraction & Standardization (`building_data_extraction.ipynb`)**
-   - Extracts targeted building and meter subsets from `train.csv` into dedicated subdirectories under `data/building/<building_id>/`.
-
-3. **Exploratory Data Analysis & Weather Merging (`task1.ipynb`, `six_months.ipynb`)**
-   - Analyzes diurnal, weekly, and seasonal consumption cycles via autocorrelation, boxplots, and heatmaps.
-   - Merges hourly site weather observations (temperature, dew point, humidity) with building meter readings and imputes missing weather values.
-
-4. **Feature Engineering**
-   - **Temporal Features**: Hour of day, day of week, month, weekend indicators.
-   - **Lag Features**: 24-hour lag (previous day, same hour) and 168-hour lag (previous week, same day and hour).
-   - **Weather Features**: Ambient air temperature and rolling averages.
-
-5. **Predictive Modeling & Evaluation**
-   - **Model**: XGBoost Regressor trained on chronological splits (e.g., 80/20 train/test split or 6-month train windows) to avoid lookahead bias.
-   - **Metrics**: Root Mean Squared Error (RMSE) and Mean Absolute Error (MAE).
-   - **Baseline Comparison**: Benchmarked against a naive previous-week persistence baseline.
-
----
-
-## Getting Started
-
-### 1. Prerequisites & Installation
-
-Clone the repository and install dependencies in a Python 3.10+ virtual environment:
+To clone and set up the repository locally:
 
 ```bash
-# Clone the repository
 git clone https://github.com/AryanBhanot/ashrae-energy-forecasting.git
 cd ashrae-energy-forecasting
 
 # Create and activate virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Windows:
+.\.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
 
-# Install required dependencies
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Exploring Analysis Notebooks
-
-Launch Jupyter Lab or Notebook to run the workflow:
-
-```bash
-jupyter lab
-```
-
-- **`notebooks/building_selection_tool.ipynb`**: Interactive building screening tool.
-- **`notebooks/building_data_extraction.ipynb`**: Extract single-building slices from `train.csv`.
-- **`notebooks/task1.ipynb`**: Complete end-to-end EDA, feature engineering, and modeling pipeline for Building 105.
-- **`notebooks/six_months.ipynb`**: 6-month forecasting study and model serialization for Building 1074.
-
 ---
 
-## Running Applications
+## 🚀 Running Applications
 
-### Interactive Streamlit Dashboard (Default App)
+### Streamlit Dashboard
 
-Launch the Streamlit app locally:
-
+- **Live Hosted App**: [https://ashrae-energy-forecasting.streamlit.app/](https://ashrae-energy-forecasting.streamlit.app/)
+- **Run Locally**:
 ```bash
 streamlit run apps/streamlit/app.py
 ```
+Open `http://localhost:8501` in your browser.
 
-The application will be accessible at `http://localhost:8501`.
-
-### Flask Web Service
-
-To run the Flask application:
-
+### Flask Service (Optional)
 ```bash
-flask --app apps/flask/app run
+flask --app apps/flask/app run --port 5000
 ```
-
-- Visit `http://127.0.0.1:5000/` for the home route.
-- Visit `http://127.0.0.1:5000/hello/<name>` for the personalized dynamic template.
-
-Alternatively, launch the debugger directly in VS Code using the pre-configured targets in `.vscode/launch.json`.
+Open `http://localhost:5000/` or `http://localhost:5000/hello/YourName`.
 
 ---
 
-## Containerization & Cloud Deployment
+## 🐳 Docker Containerization
 
-The repository includes a lightweight `Dockerfile` configured for containerized execution and deployment to **Google Cloud Run** or any OCI-compliant container platform.
+The container image is built on `python:3.13-slim`. The `.dockerignore` file excludes large raw datasets (`train.csv` at ~647 MB) while bundling `building_1074.csv` and `models/`, ensuring fast image builds and minimal footprint.
 
 ### Run Locally with Docker
-
 ```bash
-# Build the container image
 docker build -t ashrae-energy-forecasting .
-
-# Run the container (maps port 8080 to container port 8080)
 docker run -p 8080:8080 -e PORT=8080 ashrae-energy-forecasting
 ```
-
 Access the application at `http://localhost:8080`.
-
-### Deploy to Google Cloud Run
-
-```bash
-# Build and submit image to Google Artifact Registry / Container Registry
-gcloud builds submit --tag gcr.io/<PROJECT_ID>/ashrae-energy-forecasting
-
-# Deploy to Cloud Run
-gcloud run deploy ashrae-energy-forecasting \
-  --image gcr.io/<PROJECT_ID>/ashrae-energy-forecasting \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated
-```
 
 ---
 
-## Reports & Deliverables
+## 📑 Reports
 
-- **[Task1 Writeup](reports/Task1_Writeup.pdf)**: Detailed technical report documenting exploratory analysis findings, model architectures, baseline evaluations, and winter-break error analysis.
-- **[Internship Progress Timeline](reports/internship_progress_timeline.md)**: Chronological summary of work packages and milestones completed.
+- **[Methodology & Analysis Report](reports/Task1_Writeup.pdf)**: Technical report covering EDA, autocorrelation, temperature correlations, model comparisons, and winter-break error analysis.
+- **[Internship Progress Timeline](reports/internship_progress_timeline.md)**: Daily chronological log of milestones completed.
+
+---
+
+## ⚖️ License & Acknowledgements
+
+- **Dataset**: Provided by ASHRAE and Kaggle under the [Great Energy Predictor III](https://www.kaggle.com/c/ashrae-energy-prediction) competition.
+- **Author**: Aryan Bhanot
