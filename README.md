@@ -1,4 +1,6 @@
-# ⚡ ASHRAE Energy Forecasting
+# ⚡ ASHRAE Energy Forecaster
+
+![A preview image of the dashboard](image.png)
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit%20Cloud-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://ashrae-energy-forecasting.streamlit.app/)
 
@@ -40,9 +42,6 @@ ashrae-energy-forecasting/
 │   ├── building_data_extraction.ipynb    # Slicing individual buildings from train.csv
 │   ├── task1.ipynb                       # Building 105 EDA, lag features, and baseline comparison
 │   └── six_months.ipynb                  # Building 1074 6-month training & August forecast analysis
-├── reports/
-│   ├── Task1_Writeup.pdf                 # Technical writeup and error analysis report
-│   └── internship_progress_timeline.md   # Chronological log of project milestones
 ├── Dockerfile                            # Production container spec (Cloud Run ready)
 ├── .dockerignore                         # Optimized exclusion rules for slim container builds
 ├── requirements.txt                      # Project dependencies
@@ -101,13 +100,6 @@ docker build -t ashrae-energy-forecasting .
 docker run -p 8080:8080 -e PORT=8080 ashrae-energy-forecasting
 ```
 Access the application at `http://localhost:8080`.
-
----
-
-## 📑 Reports
-
-- **[Methodology & Analysis Report](reports/Task1_Writeup.pdf)**: Technical report covering EDA, autocorrelation, temperature correlations, model comparisons, and winter-break error analysis.
-- **[Internship Progress Timeline](reports/internship_progress_timeline.md)**: Daily chronological log of milestones completed.
 
 ---
 
