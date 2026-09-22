@@ -2,4 +2,8 @@ __pycache__
 *.pyc
 .venv
 .git
-data/
+# Exclude large raw files — keep only the pre-processed building CSV
+data/train.csv
+data/weather_train.csv
+data/building/105/
+notebooks/
